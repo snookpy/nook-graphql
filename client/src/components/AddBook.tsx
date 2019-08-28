@@ -1,14 +1,13 @@
 import * as React from 'react';
-import { useQuery } from '@apollo/react-hooks';
-import { getAuthorsQuery } from '../queries/quries';
-
+import { useQuery, useMutation } from '@apollo/react-hooks';
+import { getAuthorsQuery, addBookMutation } from '../queries/quries';
+import { ApolloError } from 'apollo-boost'
 export interface AddBookProps {
 
 }
 
-const SelectAuthors = () => {
+const SelectAuthors = (loading: boolean, error: ApolloError | undefined, data: any) => {
 
-    const {loading, error, data} = useQuery(getAuthorsQuery)
     if (loading)
         return (<option>loading...</option>)
     if (error)
@@ -20,16 +19,18 @@ const SelectAuthors = () => {
 }
 
 const AddBook: React.SFC<AddBookProps> = () => {
-    const [author, setAuthor] = React.useState({
+    const [author, setNewAuthor] = React.useState({
         name: '',
         genre: '',
         authorId: ''
     })
+    const [setBook, data] = useMutation(addBookMutation);
+    const {loading: authorLoading, error: authorError, data: authorData} = useQuery(getAuthorsQuery)
+
 
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault()
-
-        console.log("author author", author)
+        setBook({variables: {...author}})
     }
 
     return (
@@ -37,19 +38,17 @@ const AddBook: React.SFC<AddBookProps> = () => {
             <form id="add-book" onSubmit={ submitForm }>
                 <div className="field">
                     <label htmlFor="">Book name:</label>
-                    <input type="text" onChange={(e) => setAuthor({...author, name: e.target.value })} />
+                    <input type="text" onChange={(e) => setNewAuthor({...author, name: e.target.value })} />
                 </div>
                 <div className="field">
                     <label htmlFor="">Genre:</label>
-                    <input type="text" onChange={(e) => setAuthor({...author, genre: e.target.value })}/>
+                    <input type="text" onChange={(e) => setNewAuthor({...author, genre: e.target.value })}/>
                 </div>
                 <div className="field">
-                
                     <label htmlFor="">Author:</label>
-                    <select name="" onChange={(e) => setAuthor({...author, authorId: e.target.value })}>
-                        {SelectAuthors()}
+                    <select name="" onChange={(e) => setNewAuthor({...author, authorId: e.target.value })}>
+                        {SelectAuthors(authorLoading, authorError, authorData)}
                     </select>
-                    
                 </div>
                 <button> + </button>
             </form>
