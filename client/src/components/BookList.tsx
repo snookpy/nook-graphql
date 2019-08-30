@@ -1,31 +1,27 @@
 import * as React from 'react';
 import { useQuery } from '@apollo/react-hooks';
 import { getBooksQuery } from '../queries/quries';
+import BookDetails from './BookDetail';
 
 export interface BookListProps { }
 
-const StringTemplate = (html: any) => {
+const BookList: React.SFC<BookListProps> = () => {
+    const {loading, error, data} = useQuery(getBooksQuery);
+    const [selected, setSelect] = React.useState("")
+    if (loading)
+        return <p>Loading...</p>
+    if (error)
+        return <p>Error :(</p>
+    
     return (
         <div>
             <ul id="book-list">
-                {html}
-            </ul>
-        </div>
-    )
-}
-
-const BookList: React.SFC<BookListProps> = () => {
-    const {loading, error, data} = useQuery(getBooksQuery);
-
-    if (loading)
-        return StringTemplate(<p>Loading...</p>)
-    if (error)
-        return StringTemplate(<p>Error :(</p>)
-    
-    return (
-        StringTemplate(data.books
+            {data.books
             .map((book: any) => 
-                <li key={book.id}>{book.name}</li>))
+                <li onClick={e => {setSelect( book.id )}} key={book.id}>{book.name}</li>)}
+            </ul>
+            <BookDetails bookId={selected} />
+        </div>
     );
 }
  

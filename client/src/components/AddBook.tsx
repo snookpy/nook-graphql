@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
-import { getAuthorsQuery, addBookMutation } from '../queries/quries';
+import { getAuthorsQuery, addBookMutation, getBooksQuery } from '../queries/quries';
 import { ApolloError } from 'apollo-boost'
 export interface AddBookProps {
 
@@ -24,8 +24,12 @@ const AddBook: React.SFC<AddBookProps> = () => {
         genre: '',
         authorId: ''
     })
-    const [setBook, data] = useMutation(addBookMutation);
-    const {loading: authorLoading, error: authorError, data: authorData} = useQuery(getAuthorsQuery)
+    const [setBook, data] = useMutation(addBookMutation, {
+        refetchQueries: [
+            {query: getBooksQuery}
+        ]
+    });
+    const {loading: authorLoading, error: authorError, data: authorData, refetch} = useQuery(getAuthorsQuery)
 
 
     const submitForm = (e: React.FormEvent) => {
